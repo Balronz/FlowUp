@@ -1,21 +1,20 @@
 import express from 'express';
-import dotenv from 'dotenv';
 
-dotenv.config();
 
-//Inicializamos express
+//Initialize express and port
 const app = express();
 const port = process.env.PORT || 3000;
 
-
-app.listen(port, (error) => {
-    if(error) {
-        console.log(`Error starting the server: ${error}`);
-        return;
-    }
-
-
-    console.log(`Server running on port ${port}`);
+//Test route
+app.get('/',(req, res) => {
+    res.status(200).send("Wellcome to FlowUp");
 });
 
+//Routes
+//TODO: add routes
+
+//Middelewares
 //TODO: errorHandling middleware
+//TODO: cors and express.json middleware
+
+export default app;
