@@ -1,0 +1,27 @@
+#---------------
+#Dependencies
+#---------------
+/node_modules
+/vendor
+/dist
+/build
+
+#---------------
+#Backend
+#---------------
+/backend/.env
+/backend/node_modules
+/backend/venv/
+
+# --------------------
+# Frontend Específico
+# --------------------
+/frontend/node_modules
+
+
+# --------------------
+# Archivos del Sistema Operativo
+# --------------------
+npm-debug.log*
+yarn-error.log*
+
