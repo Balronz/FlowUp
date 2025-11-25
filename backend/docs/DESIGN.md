@@ -30,3 +30,28 @@ El archivo `app.js` simplemente cumple los siguientes puntos:
 de arranque.
 *   Middlewares: Incluye `cors()` para el manejo de peticiones cross-origin y `express.json()`
 para el analisis del cuerpo de las peticiones JSON.
+
+### 4.Implementación del Módulo Tareas (CRUD)
+El módulo `tasks` implementa la arquitectura de tres capas(Model, Service y Controller) para asegurar el aislamiento y reutilización.
+
+El flujo en el módulo `tasks` es ek siguiente:
+1. *Controller* -> *Service* Se envían los datos `taskData`, `userId`, `taskId`.
+2. *Service* -> *Controller* Devuelve documentos Mongoose o lanza el Error.
+
+Capas de Modelo
+*Responsabilidad*: Define el esquema y validaciones de datos de la BBDD.
+*Seguridad*: Incluye el campo `user`(id de usuario referenciado) para asegurar que este vinculada al usuario.
+
+Capar de Servicio
+Contiene la lógica de negocio y de BBDD.
+Solo recibe y devuelve objetos de datos JS o documentos Mongoose.
+*Seguridad*: Todas las operaciones del CRUD se filtran con `{user: userId}` para controlar que solo se puedan acceder a las tareas propias o asignadas.
+*Manejo de errores*: Se ha creado la funcion `createServiceError` para lanzar un objeto Error y manerar los posibles errores de las funciones del CRUD.
+
+Capa de Controlador:
+Punto de entrada HTTP. 
+Extrae datos de `req.body` y `req.params`.
+Hace llamada a las funciones del servicio.
+*Respuesta HTTP*: Se captura/devuelve el resultado o se lanza un Error correspondiente a cada función del CRUD que se ha realizado.
+
+### 5.Implementación del Módulo de Autenticación (User)
