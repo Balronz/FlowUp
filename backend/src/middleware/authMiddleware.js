@@ -1,4 +1,4 @@
-import jsonwebtoken from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import createServiceError from "../utils/createServiceError.js";
 

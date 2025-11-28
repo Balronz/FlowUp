@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
+
 const userSchema = new mongoose.Schema({
     userName: {
         type: String,
@@ -25,7 +26,8 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Password is required'],
         minlength: [6, 'Password must be at least 6 characters long'],
-        trim: true
+        trim: true,
+        select: false
     },
     role: {
         type: String,
@@ -52,13 +54,18 @@ userSchema.pre('save', async function(next){
 });
 
 //Method to generate token for each id
-userSchema.method.getSignedJwtToken = function() {
+userSchema.methods.getSignedJwtToken = function() {
     return jwt.sign(
         { id: this._id},
         process.env.JWT_SECRET,
         { expiresIn: process.env.JWT_EXPIRE }
     );
 };
+
+//Metho to compare password during login
+userSchema.methods.matchPassword = async function(enteredPassword) {
+    return await bcrypt.compare(enteredPassword, this.password);
+}
 
 const User = mongoose.model("user", userSchema);
 export default User;

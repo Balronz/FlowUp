@@ -1,0 +1,170 @@
+{
+	"info": {
+		"_postman_id": "4e023732-40db-4d0e-9229-83add589e678",
+		"name": "FlowUp API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "49592200",
+		"_collection_link": "https://balronz-8936516.postman.co/workspace/FlowUp~3c0fa8bd-afcc-437a-900c-3f3fbdcec89b/collection/49592200-4e023732-40db-4d0e-9229-83add589e678?action=share&source=collection_link&creator=49592200"
+	},
+	"item": [
+		{
+			"name": "Register User",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"userName\": \"mateo_admin\",\r\n    \"email\": \"mateo@flowup.com\",\r\n    \"password\": \"mateoAdmin\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:4000/api/auth/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"api",
+						"auth",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login User",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\": \"mateo@flowup.com\",\r\n    \"password\": \"mateoAdmin\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{URL}}/auth/login",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Task",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"title\": \"Primera Task Prueba\",\r\n    \"description\": \"testeo de la ruta /tasks para la creacion de una tarea\",\r\n    \"priority\": \"High\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{URL}}/tasks",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"tasks"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Task",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"title\": \"Primera Task Prueba\",\r\n    \"description\": \"testeo de la ruta /tasks para la creacion de una tarea\",\r\n    \"priority\": \"High\"\r\n}"
+				},
+				"url": {
+					"raw": "{{URL}}/tasks/6929a866feec2030a52a42ca",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"tasks",
+						"6929a866feec2030a52a42ca"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List Tasks",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Task",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "URL",
+			"value": ""
+		},
+		{
+			"key": "Initial Value",
+			"value": ""
+		},
+		{
+			"key": "Current Value",
+			"value": ""
+		}
+	]
+}

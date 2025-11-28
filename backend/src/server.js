@@ -1,15 +1,11 @@
 import app from './app.js'; //Import app to use express
 import dotenv from 'dotenv'; //Import dotenv for environment variables
 import connectDB from './config/database.js'; //Import connectDB
-
-
 //Load environment variables
 dotenv.config();
-
 //Connect to server
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || 'localhost';
-
 //Funtion to start server
 const startServer = async () => {
     try {

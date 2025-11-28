@@ -1,4 +1,5 @@
 import * as authService from '../service/authService.js';
+import createServiceError from '../utils/createServiceError.js'
 
 /**
  * Function to safely send Token
@@ -30,7 +31,7 @@ const registerUser = async(req, res, next) => {
 
 /**
  * Login user
- * @route POST /api/auth/logn
+ * @route POST /api/auth/login
  * @access public
  */
 

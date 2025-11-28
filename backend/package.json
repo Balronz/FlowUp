@@ -4,8 +4,8 @@
   "main": "src/server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon backend/src/server.js",
-    "start": "node backend/src/server.js"
+    "dev": "node -r dotenv/config src/server.js",
+    "start": "node -r dotenv/config backend/src/server.js"
   },
   "keywords": [],
   "author": "",
