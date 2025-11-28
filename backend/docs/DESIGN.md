@@ -78,3 +78,13 @@ Recibe `req` y `res` para comunicarse con Service.
 *Validación*: Verifica (que email y password no esten vacios) y los valida.
 *Helper*: usa una función Helper `sendTokenResponse`. En la que se adjunta el token a una cookie como capa de seguridad. Añadiendo al token una expiración
 de 1 día. Envía una respuesta 200 Ok al cliente.
+
+### 6.Middleware de Autenticación y Protección de Rutas
+Se ha implementado el middleware `authMiddleware` para poder hacer privadas ciertas rutas, en las que es necesario hacer
+uso del sistema de register y login.
+*Flujo de protección*:
+1. El middleware obtiene el JWT de las cookies.
+2. Se verifica y decodifica el token para obtener el ID.
+3. Se busca el usuario con ese ID y se adjunta en `req.user`
+4. En caso de que el token no sea válido o no exisitera el usuario, nos devuelve un error de no autorizado.
+
