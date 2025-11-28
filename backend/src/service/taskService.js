@@ -1,4 +1,5 @@
 import Task from "../models/Task.js";
+import createServiceError from "../utils/createServiceError.js";
 
 const createTask = async (taskData, userId) => {
         const newTask = await Task.create({
@@ -46,12 +47,7 @@ const deleteTask = async(taskId, userId) => {
         return task;
 };
 
-//Error handling function
-const createServiceError = (message, statusCode) => {
-    const error = new Error(message);
-    error.statusCode = statusCode; 
-    return error;
-};
+
 
 export {
     createTask,

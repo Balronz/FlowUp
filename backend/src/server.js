@@ -2,6 +2,7 @@ import app from './app.js'; //Import app to use express
 import dotenv from 'dotenv'; //Import dotenv for environment variables
 import connectDB from './config/database.js'; //Import connectDB
 
+
 //Load environment variables
 dotenv.config();
 
@@ -22,8 +23,11 @@ const startServer = async () => {
                 process.exit(1);
             }
             
-            console.log(`Server FlowUp running on http://${HOST}:${PORT}`);
+            console.log('\n==============================================');
+            console.log(`🎉 Server FlowUp ACTIVE, listeing in:`);
+            console.log(`access URL: http://${HOST}:${PORT}`);
             console.log(`🌐 Enviroment: ${process.env.NODE_ENV || 'development'}`);
+            console.log('==============================================');
         });
 
     } catch (err) {

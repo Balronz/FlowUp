@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 const userSchema = new mongoose.Schema({
     userName: {
@@ -50,5 +51,14 @@ userSchema.pre('save', async function(next){
     }
 });
 
-const User = mongoose.Schema("user", userSchema);
+//Method to generate token for each id
+userSchema.method.getSignedJwtToken = function() {
+    return jwt.sign(
+        { id: this._id},
+        process.env.JWT_SECRET,
+        { expiresIn: process.env.JWT_EXPIRE }
+    );
+};
+
+const User = mongoose.model("user", userSchema);
 export default User;

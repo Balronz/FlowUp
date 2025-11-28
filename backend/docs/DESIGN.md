@@ -34,7 +34,7 @@ para el analisis del cuerpo de las peticiones JSON.
 ### 4.Implementación del Módulo Tareas (CRUD)
 El módulo `tasks` implementa la arquitectura de tres capas(Model, Service y Controller) para asegurar el aislamiento y reutilización.
 
-El flujo en el módulo `tasks` es ek siguiente:
+El flujo en el módulo `tasks` es el siguiente:
 1. *Controller* -> *Service* Se envían los datos `taskData`, `userId`, `taskId`.
 2. *Service* -> *Controller* Devuelve documentos Mongoose o lanza el Error.
 
@@ -55,3 +55,26 @@ Hace llamada a las funciones del servicio.
 *Respuesta HTTP*: Se captura/devuelve el resultado o se lanza un Error correspondiente a cada función del CRUD que se ha realizado.
 
 ### 5.Implementación del Módulo de Autenticación (User)
+El módulo `user` implementa la arquitectura de tres capas(Model, Service y Controller) para asegurar el aislamiento y reutilización.
+
+El flujo en el módulo `user` es el siguiente:
+1. *Contorller* -> *Service*: Se envian los datos `userData`, `email` y `password`.
+2. *Service* -> *Controller*: Devuelve los datos de JWT Token o lanza un error según la situacion.
+
+Capa de Modelo
+*Seguridad y validación*: Define el esquema del usuario (`email`, `password`, `userName`).
+*Lógica de password*: Se usa Mongoose Pre-Hooks para hashear el password con Bcrypt antes de guardar el documento.
+*Métodos de instancia*: se implementan métodos para generar el Token usando el Id del usuario `getSignedJwtToken()` y comparar el password con el hasheado
+`isMatched`.
+
+Capa de Servicio
+Solo se encarga de la creación, validación de credenciales y generacion de token.
+*Registro*: se crea el usuario y se devuelve el token a raiz de su Id `registerUser`.
+*Login*: Busca el email y verificando tanto el email como la password devuelve el token si existe `loginUser`.
+*Manejo de errores*: se aplica el manejo de errores según el metodo que se esté usando devolviendo un código de error especifico para cada uno.
+
+Capa de Controlador
+Recibe `req` y `res` para comunicarse con Service.
+*Validación*: Verifica (que email y password no esten vacios) y los valida.
+*Helper*: usa una función Helper `sendTokenResponse`. En la que se adjunta el token a una cookie como capa de seguridad. Añadiendo al token una expiración
+de 1 día. Envía una respuesta 200 Ok al cliente.
