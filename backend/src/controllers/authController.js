@@ -49,4 +49,26 @@ const loginUser = async(req, res, next) => {
     }
 };
 
-export {registerUser, loginUser};
+/**
+ * Logout user
+ * @route POST /api/auth/logout
+ * @access public
+ */
+const logoutUser = async(req, res, next) => {
+    try{
+        res.cookie('token', 'none', {
+            expires: new Date(Date.now() + 10 * 1000),
+            httpOnly: true,
+        })
+        res.status(200).json({
+            success: true,
+            data: 'Logout, success.'
+        });
+
+    } catch(err){
+        next(err);
+    }
+
+};
+
+export {registerUser, loginUser, logoutUser};
