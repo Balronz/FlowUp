@@ -1,6 +1,6 @@
 # BACKEND
 ## Documento de Dieseño - FlowUp API
-_Este documento detalla los pasos y el diseño arquitectonico base de la construcción del backend (*API REST*), basado en los Principios de Modularidad
+Este documento detalla los pasos y el diseño arquitectonico base de la construcción del backend (*API REST*), basado en los Principios de Modularidad
 y Separacion de Responsabilidades.
 
 ### 1.Principio Centra: Separación de Responsabilidades
@@ -88,3 +88,8 @@ uso del sistema de register y login.
 3. Se busca el usuario con ese ID y se adjunta en `req.user`
 4. En caso de que el token no sea válido o no exisitera el usuario, nos devuelve un error de no autorizado.
 
+### 7.Capa de validacion y manero de errores de entrada
+Se añade una capa mas de seguridad usando `express-validator` un middleware para garantizar la integridad de los datos de entrada en *req.body*.
+*Arquitectura de validacion*: tanto para `auth` como para `tasks` se crean arrays donde se definen reglas (`check()`) para los campos definiendo atributos obligarios, opcionales, longitudes...
+A traves del middleware y de su función que exportamos `validate`, se leen los errores internos de `express-validator`, si existen se genera el error y se pasa a la cadena de Express.
+*Integracion de rutas*: las validaciones se insertan como middleware justo antes del controlador siguiendo un orden estricto. En Auth aplicamos las validaciones a las rutas `/register, /login, /update`. Mientras que en Tasks las aplicamos a `/post /patch`.

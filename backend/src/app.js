@@ -20,6 +20,9 @@ app.use(cookieParser());
 
 
 //Routes
+app.get('/', (req, res) => {
+    res.status(200).send({ success: true, message: 'FlowUp API Prueba' });
+});
 app.use('/api/auth', authRouter);
 app.use('/api/tasks', taskRouter);
 

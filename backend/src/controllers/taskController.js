@@ -3,7 +3,7 @@ import * as taskService from'../service/taskService.js';
 /**
  * @desc    Creates new task
  * @route   POST /api/tasks
- * @access  Private (require JWT)
+ * @access  private (require JWT)
  */
 const createTask = async (req, res, next) => {
     try {
@@ -17,7 +17,7 @@ const createTask = async (req, res, next) => {
 /**
  * @desc    Gets All tasks
  * @route   GET /api/tasks
- * @access  Private
+ * @access  private
  */
 const getAllTasks = async(req, res, next) => {
     try{
@@ -31,7 +31,7 @@ const getAllTasks = async(req, res, next) => {
 /**
  * @desc    Gets one task by Id
  * @route   GET /api/tasks/:id
- * @access  Private
+ * @access  private
  */
 const getTaskById = async(req, res, next) => {
     try{
@@ -45,7 +45,7 @@ const getTaskById = async(req, res, next) => {
 /**
  * @desc    Updates task by Id
  * @route   PUT /api/tasks/:id
- * @access  Private
+ * @access  private
  */
 const updateTask = async(req, res, next) => {
     try {
@@ -59,7 +59,7 @@ const updateTask = async(req, res, next) => {
 /**
  * @desc    Deletes Task by Id
  * @route   DELETE /api/tasks/:id
- * @access  Private
+ * @access  private
  */
 const deleteTask = async(req, res, next) => {
     try {
@@ -69,6 +69,8 @@ const deleteTask = async(req, res, next) => {
         next(err);
     }
 };
+
+
 
 export{
     createTask,
