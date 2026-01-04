@@ -45,4 +45,13 @@ router.patch('/update'
     , updateUser);
 
 
+/**
+ * @desc get User data
+ * @route GET /api/auth/user
+ * @access private
+ */
+router.get('/user', protect, (req, res) => {
+    res.json(req.user);
+});
+
 export default router;
