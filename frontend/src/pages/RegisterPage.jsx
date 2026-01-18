@@ -64,10 +64,19 @@ import { UserPlus, Mail, Lock, User, Loader2, AlertCircle } from "lucide-react";
         setIsSubmiting(true);
         
         //Send data to AuthContext
-        const result = await signup(formData.userName, formData.email, formData.password);
-
-        if(!result.success) {
-            setError(result.error);
+        try{
+            const result = await signup(formData.userName, formData.email, formData.password);
+            if(result.success) {
+                //Redirect to login
+                navigate('/login', {
+                    state: { message: "Account created successfully! Please log in." }
+                });
+            } else {
+                setError(result.error || "An error ocurred during registration.");
+                setIsSubmiting(false)
+            }
+        } catch (err){
+            setError("Connection failed. Please try again later.");
             setIsSubmiting(false);
         }
     };

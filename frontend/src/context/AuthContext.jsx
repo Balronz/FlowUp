@@ -14,7 +14,6 @@ export const useAuth = () => {
         throw new Error("useAuth must be used within an AuthProvider")
     }
     return context;
-    //return useContext(AuthContext);
 };
 
 
@@ -50,7 +49,7 @@ export const AuthProvider = ({ children }) => {
         try{
             const res = await loginUser(email, password);
             setUser(res.user || res);
-            navigate('/app/tasks');
+            navigate('/tasks');
             return { success: true };
         } catch(error){
             setUser(null);
@@ -71,7 +70,7 @@ export const AuthProvider = ({ children }) => {
         try {
             const res = await registerUser(userName, email, password);
             setUser(res.user || res);
-            navigate('/app/tasks');
+            navigate('/tasks');
             return { success: true };
         } catch(error) {
             //In case the email already exists or there's an error
