@@ -1,16 +1,18 @@
-import { validationResult } from "express-validator";
-import createServiceError from "../utils/createServiceError.js"; 
+import { ExpressValidator, validationResult } from 'express-validator';
 
-const validate = (req, res, next) => {
-    const error = validationResult(req);
-    if(error.isEmpty()){
-        return next();
+const validateTask = (req, res, next) => {
+    const errors = validationResult(req);
+    
+    if (!errors.isEmpty()) {
+        // ERROR COMÚN: No poner los paréntesis en .array()
+        // Esto causaba que intentaras enviar una función por red, lo cual rompe el JSON
+        return res.status(400).json({
+            success: false,
+            message: "Datos de tarea inválidos",
+            errors: errors.array() 
+        });
     }
-    const firstError = error.array[0].msg;
-    const validationError = createServiceError(
-        `Validation failed: ${firstError}`, 400
-    );
-    next(validationError);
+    next();
 };
 
-export default validate;
+export default validateTask;

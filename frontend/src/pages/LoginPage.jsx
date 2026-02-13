@@ -54,19 +54,19 @@ const LoginPage = () => {
     };
 
         return (
-        <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-            <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl p-8 border border-slate-100">
+        <div className="min-h-screen flex items-center justify-center p-4 bg-slate-300">
+            <div className="max-w-md w-full bg-stone-50 rounded-3xl shadow-2xl p-8 border border-indigo-100 shadow-indigo-500/10">
                 
                 <div className="text-center mb-8">
-                    <div className="bg-blue-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-200">
-                        <UserPlus className="w-8 h-8 text-white" />
+                    <div className="bg-violet-500 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-indigo-500/10">
+                        <UserPlus className="w-8 h-8 slate-800" />
                     </div>
                     <h1 className="text-3xl font-black text-slate-800 tracking-tight">FlowUp</h1>
                     <p className="text-slate-500 mt-2 font-medium text-lg">Login</p>
                 </div>
 
                 {error && (
-                    <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-r-xl flex items-center animate-pulse">
+                    <div className="bg-red-50 border-l-4 border-indigo-100 text-slate-800 p-4 mb-6 rounded-r-xl flex items-center animate-pulse">
                         <AlertCircle className="w-5 h-5 mr-3 flex-shrink-0" />
                         <span className="text-sm font-bold">{error}</span>
                     </div>
@@ -74,16 +74,16 @@ const LoginPage = () => {
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-1">
-                        <label className="text-sm font-bold text-slate-700 ml-1">Email</label>
+                        <label className="text-sm font-bold text-slate-800 ml-1">Email</label>
                         <div className="relative">
-                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-800 w-5 h-5" />
                             <input
                                 type="email"
                                 name="email"
                                 required
                                 value={formData.email}
                                 onChange={handleChange}
-                                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all"
+                                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-indigo-100 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all"
                                 placeholder="Email"
                             />
                         </div>
@@ -91,16 +91,16 @@ const LoginPage = () => {
 
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div className="space-y-1">
-                            <label className="text-sm font-bold text-slate-700 ml-1">Password</label>
+                            <label className="text-sm font-bold text-slate-800 ml-1">Password</label>
                             <div className="relative">
-                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-800 w-5 h-5" />
                                 <input
                                     type="password"
                                     name="password"
                                     required
                                     value={formData.password}
                                     onChange={handleChange}
-                                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all"
+                                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-indigo-100 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all"
                                     placeholder="*****"
                                 />
                             </div>
@@ -110,7 +110,7 @@ const LoginPage = () => {
                     <button
                         type="submit"
                         disabled={isSubmiting}
-                        className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-2xl shadow-lg shadow-blue-100 transition-all flex items-center justify-center active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
+                        className="w-full mt-4 bg-violet-500 hover:bg-emerald-700 text-slate-800 font-black py-4 rounded-2xl shadow-lg shadow-indigo-500/10 transition-all flex items-center justify-center active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
                     >
                         {isSubmiting ? (
                             <>
@@ -123,11 +123,11 @@ const LoginPage = () => {
                     </button>
                 </form>
 
-                <div className="mt-8 pt-6 border-t border-slate-100 text-center">
-                    <p className="text-slate-500 font-medium">
+                <div className="mt-8 pt-6 border-t border-indigo-100 text-center">
+                    <p className="text-slate-800 font-medium ">
                         Don't have an account?{" "}
-                        <Link to="/register" className="text-blue-600 font-bold hover:underline">
-                            SIGN UP
+                        <Link to="/register" className="text-violet-500 font-bold hover:underline ">
+                            SIGN UP 
                         </Link>
                     </p>
                 </div>

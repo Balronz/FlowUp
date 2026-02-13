@@ -1,418 +1,308 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import {
-  Plus,
-  Search,
-  Filter,
-  MoreVertical,
-  CheckCircle2,
-  Circle,
-  Clock,
-  Trash2,
-  LayoutGrid,
-  List as ListIcon,
-  LogOut,
-  AlertCircle,
-  X,
+  Plus, Search, CheckCircle2, Circle, LayoutGrid, LogOut, 
+  X, Loader2, PlayCircle, Ban, AlertCircle
 } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
-/**
- * @description TaskPage Component
- * He corregido la firma de la función para desestructurar las props correctamente.
- * También he implementado el modal de creación que estaba pendiente.
- */
+//Domain Constants
+const TASK_STATUS = {
+  PENDING: "Pending",
+  IN_PROGRESS: "In progress",
+  COMPLETED: "Completed",
+  CANCELLED: "Cancelled"
+};
+
+const PRIORITIES = ["Low", "Medium", "High"];
+
+const STATUS_CONFIG = {
+  [TASK_STATUS.PENDING]: { label: "Pending", color: "text-slate-400", bg: "bg-slate-100", icon: Circle },
+  [TASK_STATUS.IN_PROGRESS]: { label: "In progress", color: "text-blue-500", bg: "bg-blue-50", icon: PlayCircle },
+  [TASK_STATUS.COMPLETED]: { label: "Completed", color: "text-green-500", bg: "bg-green-50", icon: CheckCircle2 },
+  [TASK_STATUS.CANCELLED]: { label: "Cancelled", color: "text-red-400", bg: "bg-red-50", icon: Ban },
+};
+
 const TaskPage = ({
   initialTasks = [],
   onAddTask,
-  onDeleteTask,
-  onToggleTask,
-  user = { displayName: "Admin User", email: "admin@flowup.com" }, // Fallback para desarrollo
-  logout = () => console.log("Logout clicked"),
+  onUpdateTask,
 }) => {
-  // --- Estados de la Interfaz ---
+  // States
   const [tasks, setTasks] = useState(initialTasks);
-  const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useState("grid");
-
-  // Estados para el Modal (Nuevas Tareas)
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newTask, setNewTask] = useState({
-    title: "",
-    description: "",
-    priority: "low",
+  const [errorMessage, setErrorMessage] = useState("");
+  const { logout } = useAuth();
+
+  const [newTask, setNewTask] = useState({ 
+    title: "", 
+    description: "", 
+    priority: "Medium"
   });
 
-  // Sincronización: Si las tareas vienen de una API externa (props), actualizamos el estado local
+  // References
+  const prevInitialTasksRef = useRef(initialTasks);
+
+  //Prop syncs (Deep Compare using JSON)
   useEffect(() => {
-    setTasks(initialTasks);
+    const currentInitialStr = JSON.stringify(initialTasks);
+    if (currentInitialStr !== JSON.stringify(prevInitialTasksRef.current)) {
+      setTasks(initialTasks);
+      prevInitialTasksRef.current = initialTasks;
+    }
   }, [initialTasks]);
 
-  // --- Lógica de Filtrado (Memoizada implícitamente en el render) ---
-  const filteredTasks = (Array.isArray(tasks) ? tasks : []).filter((task) => {
-    const matchesFilter =
-      filter === "all"
-        ? true
-        : filter === "completed"
-        ? task.status === "completed"
-        : task.status === "pending";
+  // Bussiness logic
+  const filteredTasks = useMemo(() => {
+    return tasks
+      .map((t, i) => ({ ...t, stableId: t._id || t.id || `task-${i}` }))
+      .filter((task) => {
+        const matchesFilter = filter === "all" || task.status === filter;
+        const matchesSearch = (task.title || "").toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesFilter && matchesSearch;
+      });
+  }, [tasks, filter, searchQuery]);
 
-    const matchesSearch = task.title
-      ?.toLowerCase()
-      .includes(searchQuery.toLowerCase());
-    return matchesFilter && matchesSearch;
-  });
+  //Handlers
 
-  // --- Handlers (Manejadores de Eventos) ---
-
-  const handleToggle = async (id) => {
-    // Si existe una función externa (ej. Firebase/API), la usamos
-    if (onToggleTask) {
-      await onToggleTask(id);
-    } else {
-      // Si no, actualizamos el estado local (Modo demo)
-      setTasks((prev) =>
-        prev.map((t) =>
-          t.id === id
-            ? {
-                ...t,
-                status: t.status === "completed" ? "pending" : "completed",
-              }
-            : t
-        )
-      );
+  const handleCreateTask = async (e) => {
+    // Prevents default browser
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
     }
-  };
+    
+    setErrorMessage("");
+    console.log("Submit disparado: Validando datos...");
 
-  const handleDelete = async (id) => {
-    if (onDeleteTask) {
-      await onDeleteTask(id);
-    } else {
-      setTasks((prev) => prev.filter((t) => t.id !== id));
+    //Validation
+    const cleanTitle = newTask.title.trim();
+    if (!cleanTitle) {
+      setErrorMessage("Title is required.");
+      return;
     }
-  };
 
-  const handleCreateTask = (e) => {
-    e.preventDefault();
-    if (!newTask.title.trim()) return;
+    if (isSubmitting) return;
 
-    const taskToCreate = {
-      id: Date.now(),
-      title: newTask.title,
-      description: newTask.description,
-      priority: newTask.priority,
-      status: "pending",
-      createdAt: new Date().toISOString(),
+    //Payload
+    setIsSubmitting(true);
+    const taskPayload = {
+      title: cleanTitle,
+      description: (newTask.description || "").trim(),
+      priority: newTask.priority
     };
 
-    if (onAddTask) {
-      onAddTask(taskToCreate);
-    } else {
-      setTasks((prev) => [taskToCreate, ...prev]);
-    }
+    //Temp ID 
+    const tempId = `temp-${Date.now()}`;
+    const optimisticTask = { ...taskPayload, _id: tempId, status: TASK_STATUS.PENDING };
 
-    // Reset y cierre
-    setNewTask({ title: "", description: "", priority: "low" });
-    setIsModalOpen(false);
+    try {
+      console.log("Sending to API...", taskPayload);
+      
+      //Visual update
+      setTasks(prev => [optimisticTask, ...prev]);
+
+      // Callback with security timeout
+      if (typeof onAddTask !== 'function') {
+        throw new Error("onAddTask not defined or not a function.");
+      }
+
+      const response = await onAddTask(taskPayload);
+      console.log("OK response");
+
+      //Replaces temp task with server task
+      const savedTask = response?.data || response;
+      setTasks(prev => prev.map(t => t._id === tempId ? { ...optimisticTask, ...savedTask } : t));
+
+      //State reset
+      setNewTask({ title: "", description: "", priority: "Medium" });
+      setIsModalOpen(false);
+      
+    } catch (error) {
+      console.error("Create error:", error);
+      setErrorMessage("Server connection error. Try again.");
+      // Rollback state
+      setTasks(prev => prev.filter(t => t._id !== tempId));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleUpdateStatus = async (taskId, newStatus) => {
+    setTasks(prev => prev.map(t => (t._id || t.id) === taskId ? { ...t, status: newStatus } : t));
+    try {
+      if (onUpdateTask) await onUpdateTask(taskId, { status: newStatus });
+    } catch (error) {
+      console.error("Update error:", error);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex font-sans text-slate-900">
-      {/* Sidebar - Navegación Izquierda */}
-      <aside className="w-64 bg-white border-r border-slate-200 hidden md:flex flex-col">
-        <div className="p-6 border-b border-slate-50 flex items-center gap-3">
-          <div className="bg-blue-600 p-2 rounded-lg text-white font-black text-xl w-10 h-10 flex items-center justify-center">
-            F
-          </div>
-          <span className="font-black text-slate-800 text-xl tracking-tighter">
-            FlowUp
-          </span>
+    <div className="min-h-screen bg-[#FDFDFD] flex font-sans text-slate-800">
+      {/* Sidebar */}
+      <aside className="w-72 bg-white border-r border-slate-100 hidden lg:flex flex-col">
+        <div className="p-10 flex items-center gap-3">
+          <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black shadow-lg">F</div>
+          <h1 className="text-2xl font-black tracking-tighter text-slate-800">Taskly</h1>
         </div>
-
-        <nav className="flex-1 p-4 space-y-1">
-          <button className="w-full flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-600 rounded-xl font-bold text-sm">
-            <LayoutGrid className="w-4 h-4" /> My Tasks
-          </button>
-          <button className="w-full flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-50 rounded-xl font-bold text-sm transition-colors">
-            <Clock className="w-4 h-4" /> Recents
+        <nav className="flex-1 px-6 space-y-2">
+          <button className="w-full flex items-center gap-3 px-6 py-4 bg-indigo-50 text-indigo-600 rounded-2xl font-bold text-sm">
+            <LayoutGrid className="w-4 h-4" /> Dashboard
           </button>
         </nav>
-
-        <div className="p-4 border-t border-slate-50">
-          <div className="bg-slate-900 rounded-3xl p-4 text-white shadow-lg">
-            <p className="text-[10px] font-black uppercase text-slate-400 mb-1 tracking-widest">
-              Active Session
-            </p>
-            <p className="text-sm font-bold truncate mb-3">
-              {user?.displayName || user?.email}
-            </p>
-            <button
-              onClick={logout}
-              className="w-full flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 py-2 rounded-lg text-[10px] font-black uppercase transition-all border border-red-500/20"
-            >
-              <LogOut className="w-3 h-3" /> Logout
-            </button>
-          </div>
+        <div className="p-8">
+          <button onClick={logout} className="w-full py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest text-indigo-600 hover:text-emerald-700 transition-all">
+            <LogOut className="w-4 h-4 inline mr-2" /> Logout
+          </button>
         </div>
       </aside>
 
-      {/* Contenido Principal */}
       <main className="flex-1 flex flex-col h-screen overflow-hidden">
-        {/* Header - Búsqueda y Acción */}
-        <header className="h-20 bg-white border-b border-slate-100 flex items-center justify-between px-8 shrink-0">
+        {/* Header */}
+        <header className="h-24 bg-slate-300 border-b border-slate-100 flex items-center justify-between px-12 shrink-0">
           <div>
-            <h2 className="text-xl font-black text-slate-800 tracking-tight">
-              Dashboard
-            </h2>
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">
-              Track your daily progress
+            <h2 className="text-2xl font-black text-slate-800 tracking-tight">Tasks</h2>
+            <p className="text-[10px] text-slate-800 font-bold uppercase tracking-widest mt-1">
+              {filteredTasks.length} Tasks Found
             </p>
           </div>
-
           <div className="flex items-center gap-4">
-            <div className="relative hidden sm:block">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search by title..."
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-800" />
+              <input 
+                type="text" 
+                placeholder="Search tasks by title..." 
+                className="bg-slate-50 border-none pl-12 pr-6 py-3 rounded-2xl text-sm w-64 focus:ring-2 focus:ring-indigo-500/20 outline-none"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-slate-50 border border-slate-200 pl-10 pr-4 py-2 rounded-xl text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none w-64 transition-all"
               />
             </div>
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl shadow-lg shadow-blue-200 transition-all active:scale-95 flex items-center gap-2 font-bold text-sm"
+            <button 
+              type="button"
+              onClick={() => { setErrorMessage(""); setIsModalOpen(true); }}
+              className="bg-indigo-600 hover:bg-emerald-700 text-slate-800 px-8 py-3 rounded-2xl font-bold text-sm shadow-xl shadow-indigo-100 flex items-center gap-2 transition-all active:scale-95"
             >
-              <Plus className="w-4 h-4" />
-              <span className="hidden sm:inline">New Task</span>
+              <Plus className="w-4 h-4" /> Create Task
             </button>
           </div>
         </header>
 
-        {/* Filtros y Vista de Tareas */}
-        <div className="flex-1 overflow-y-auto p-8 space-y-6">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            {/* Filtros de Estado */}
-            <div className="flex bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
-              {["all", "pending", "completed"].map((type) => (
-                <button
-                  key={type}
-                  onClick={() => setFilter(type)}
-                  className={`px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-tighter transition-all ${
-                    filter === type
-                      ? "bg-slate-900 text-white shadow-md"
-                      : "text-slate-400 hover:bg-slate-50"
-                  }`}
-                >
-                  {type === "all"
-                    ? "All"
-                    : type === "pending"
-                    ? "Pending"
-                    : "Done"}
-                </button>
-              ))}
-            </div>
-
-            {/* Alternar Vista Grid/List */}
-            <div className="flex items-center gap-2 bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
-              <button
-                onClick={() => setViewMode("grid")}
-                className={`p-2 rounded-lg transition-colors ${
-                  viewMode === "grid"
-                    ? "bg-slate-100 text-blue-600"
-                    : "text-slate-400"
-                }`}
+        {/* Content Area */}
+        <div className="flex-1 overflow-y-auto p-12 bg-slate-50/40">
+          <div className="flex gap-2 mb-10 overflow-x-auto pb-2">
+            <button 
+              onClick={() => setFilter("all")} 
+              className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filter === "all" ? "bg-slate-800 text-white" : "bg-white text-slate-400 border border-slate-200"}`}
+            >
+              All
+            </button>
+            {Object.values(TASK_STATUS).map(s => (
+              <button 
+                key={s} 
+                onClick={() => setFilter(s)} 
+                className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filter === s ? "bg-slate-800 text-white" : "bg-white text-slate-400 border border-slate-200"}`}
               >
-                <LayoutGrid className="w-4 h-4" />
+                {s}
               </button>
-              <button
-                onClick={() => setViewMode("list")}
-                className={`p-2 rounded-lg transition-colors ${
-                  viewMode === "list"
-                    ? "bg-slate-100 text-blue-600"
-                    : "text-slate-400"
-                }`}
-              >
-                <ListIcon className="w-4 h-4" />
-              </button>
-            </div>
+            ))}
           </div>
 
-          {/* Lista de Tareas */}
-          {loading ? (
-            <div className="flex items-center justify-center h-64">
-              <div className="flex flex-col items-center gap-4">
-                <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                <p className="text-xs font-black text-slate-400 uppercase tracking-widest">
-                  Synchronizing tasks...
-                </p>
-              </div>
-            </div>
-          ) : filteredTasks.length > 0 ? (
-            <div
-              className={
-                viewMode === "grid"
-                  ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-                  : "space-y-3"
-              }
-            >
-              {filteredTasks.map((task) => (
-                <div
-                  key={task.id}
-                  className={`bg-white border group transition-all duration-300 ${
-                    viewMode === "grid"
-                      ? "p-6 rounded-[2.5rem] hover:shadow-2xl hover:shadow-blue-500/5 hover:-translate-y-1"
-                      : "p-4 rounded-2xl flex items-center justify-between"
-                  } ${
-                    task.status === "completed"
-                      ? "border-green-100 bg-green-50/10"
-                      : "border-slate-100 hover:border-blue-200"
-                  }`}
-                >
-                  <div
-                    className={
-                      viewMode === "list"
-                        ? "flex items-center gap-4 flex-1"
-                        : ""
-                    }
-                  >
-                    <button
-                      onClick={() => handleToggle(task.id)}
-                      className="transition-transform active:scale-125 shrink-0"
-                    >
-                      {task.status === "completed" ? (
-                        <CheckCircle2 className="w-7 h-7 text-green-500 fill-white shadow-sm" />
-                      ) : (
-                        <Circle className="w-7 h-7 text-slate-200 hover:text-blue-500 transition-colors" />
-                      )}
-                    </button>
-
-                    <div
-                      className={viewMode === "grid" ? "mt-4" : "flex-1 ml-2"}
-                    >
-                      <h3
-                        className={`font-bold text-slate-800 tracking-tight ${
-                          task.status === "completed"
-                            ? "line-through text-slate-400"
-                            : ""
-                        }`}
-                      >
-                        {task.title}
-                      </h3>
-                      {viewMode === "grid" && (
-                        <p className="text-slate-500 text-[13px] mt-2 line-clamp-2 font-medium leading-relaxed">
-                          {task.description ||
-                            "No additional information provided."}
-                        </p>
-                      )}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+            {filteredTasks.map((task) => {
+              const config = STATUS_CONFIG[task.status] || STATUS_CONFIG[TASK_STATUS.PENDING];
+              const StatusIcon = config.icon;
+              return (
+                <div key={task.stableId} className="bg-white border border-slate-200 p-8 rounded-[2.5rem] hover:shadow-xl transition-all group flex flex-col h-full">
+                  <div className="flex justify-between items-start mb-6">
+                    <div className={`px-4 py-1.5 rounded-full ${config.bg} ${config.color} text-[10px] font-black uppercase flex items-center gap-2`}>
+                      <StatusIcon className="w-3.5 h-3.5" /> {config.label}
                     </div>
                   </div>
-
-                  <div
-                    className={
-                      viewMode === "grid"
-                        ? "mt-6 pt-5 border-t border-slate-50 flex items-center justify-between"
-                        : "flex items-center gap-4"
-                    }
-                  >
-                    <span
-                      className={`text-[9px] font-black uppercase px-2.5 py-1 rounded-lg border ${
-                        task.priority === "high"
-                          ? "bg-red-50 text-red-500 border-red-100"
-                          : task.priority === "medium"
-                          ? "bg-amber-50 text-amber-500 border-amber-100"
-                          : "bg-blue-50 text-blue-500 border-blue-100"
-                      }`}
-                    >
-                      {task.priority || "medium"}
-                    </span>
-                    <button
-                      onClick={() => handleDelete(task.id)}
-                      className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                  <h3 className="text-xl font-bold text-slate-800 mb-3">{task.title}</h3>
+                  <p className="text-slate-800 text-sm leading-relaxed mb-8 flex-1">{task.description || "No description provided."}</p>
+                  <div className="pt-6 border-t border-slate-50 flex items-center justify-between">
+                    <div className="flex gap-1.5">
+                      {Object.entries(STATUS_CONFIG).map(([key, val]) => (
+                        <button 
+                          key={`${task.stableId}-upd-${key}`}
+                          onClick={() => handleUpdateStatus(task.stableId, key)}
+                          title={val.label}
+                          className={`p-2 rounded-xl transition-all ${task.status === key ? `${val.bg} ${val.color} ring-1 ring-current` : "bg-slate-50 text-slate-200 hover:text-emerald-700"}`}
+                        >
+                          <val.icon className="w-4 h-4" />
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-24 text-center bg-white rounded-[3rem] border border-dashed border-slate-200">
-              <div className="bg-slate-50 p-8 rounded-full mb-6">
-                <AlertCircle className="w-12 h-12 text-slate-300" />
-              </div>
-              <h3 className="text-2xl font-black text-slate-800 tracking-tight">
-                No tasks found
-              </h3>
-              <p className="text-slate-400 font-bold text-sm uppercase tracking-widest mt-2">
-                All caught up!
-              </p>
-            </div>
-          )}
+              );
+            })}
+          </div>
         </div>
       </main>
 
-      {/* MODAL - Crear Nueva Tarea */}
+      {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-md p-8 shadow-2xl animate-in fade-in zoom-in duration-200">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-2xl font-black text-slate-800 tracking-tight">
-                Create Task
-              </h3>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-md">
+          <div className="bg-white rounded-[3rem] w-full max-w-lg p-12 relative shadow-2xl overflow-hidden">
+            <button 
+              type="button"
+              onClick={() => setIsModalOpen(false)} 
+              className="absolute top-10 right-10 text-slate-300 hover:text-slate-600 transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            
+            <h3 className="text-3xl font-black mb-2 text-slate-900 tracking-tighter">New Task</h3>
+            <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-10">Add New Task</p>
 
-            <form onSubmit={handleCreateTask} className="space-y-4">
-              <div>
-                <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">
-                  Title
-                </label>
-                <input
-                  autoFocus
-                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all mt-1"
-                  placeholder="What needs to be done?"
+            {errorMessage && (
+              <div className="mb-6 p-4 bg-red-50 rounded-2xl flex items-center gap-3 text-red-500 text-xs font-bold animate-pulse">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                {errorMessage}
+              </div>
+            )}
+
+            {/* FORM */}
+            <form onSubmit={handleCreateTask} className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Task Title</label>
+                <input 
+                  required
+                  className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 outline-none focus:ring-2 focus:ring-indigo-500/20 font-bold text-slate-700"
+                  placeholder=""
                   value={newTask.title}
-                  onChange={(e) =>
-                    setNewTask({ ...newTask, title: e.target.value })
-                  }
+                  onChange={e => setNewTask({...newTask, title: e.target.value})}
+                  disabled={isSubmitting}
                 />
               </div>
 
-              <div>
-                <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">
-                  Description
-                </label>
-                <textarea
-                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all mt-1 min-h-[100px]"
-                  placeholder="Add some details..."
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Description</label>
+                <textarea 
+                  className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 outline-none focus:ring-2 focus:ring-indigo-500/20 font-medium min-h-[100px] resize-none"
+                  placeholder="Description..."
                   value={newTask.description}
-                  onChange={(e) =>
-                    setNewTask({ ...newTask, description: e.target.value })
-                  }
+                  onChange={e => setNewTask({...newTask, description: e.target.value})}
+                  disabled={isSubmitting}
                 />
               </div>
 
-              <div>
-                <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">
-                  Priority
-                </label>
-                <div className="flex gap-2 mt-1">
-                  {["low", "medium", "high"].map((p) => (
-                    <button
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Priority</label>
+                <div className="flex gap-2">
+                  {PRIORITIES.map(p => (
+                    <button 
                       key={p}
                       type="button"
-                      onClick={() => setNewTask({ ...newTask, priority: p })}
-                      className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase border transition-all ${
-                        newTask.priority === p
-                          ? "bg-slate-900 text-white border-slate-900 shadow-lg"
-                          : "bg-white text-slate-400 border-slate-100 hover:bg-slate-50"
+                      onClick={() => setNewTask({...newTask, priority: p})}
+                      disabled={isSubmitting}
+                      className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase transition-all ${
+                        newTask.priority === p 
+                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' 
+                        : 'bg-slate-50 text-slate-400 hover:bg-emerald-700'
                       }`}
                     >
                       {p}
@@ -420,12 +310,22 @@ const TaskPage = ({
                   ))}
                 </div>
               </div>
-
-              <button
-                type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-200 transition-all active:scale-95 mt-4"
+              <button 
+                type="submit" 
+                disabled={isSubmitting || !newTask.title.trim()}
+                className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-sm mt-4 flex items-center justify-center gap-3 hover:bg-emerald-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
               >
-                SAVE TASK
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="animate-spin w-5 h-5" />
+                    LOADING...
+                  </>
+                ) : (
+                  <>
+                    CREATE TASK
+                    <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform" />
+                  </>
+                )}
               </button>
             </form>
           </div>
