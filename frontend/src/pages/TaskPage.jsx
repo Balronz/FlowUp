@@ -144,7 +144,7 @@ const TaskPage = ({
       {/* Sidebar */}
       <aside className="w-72 bg-white border-r border-slate-100 hidden lg:flex flex-col">
         <div className="p-10 flex items-center gap-3">
-          <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black shadow-lg">F</div>
+          <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black shadow-lg">T</div>
           <h1 className="text-2xl font-black tracking-tighter text-slate-800">Taskly</h1>
         </div>
         <nav className="flex-1 px-6 space-y-2">

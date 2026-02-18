@@ -1,16 +1,19 @@
-# React + Vite
+### README del Frontend (`/frontend/README.md`)
+Enfoque en la experiencia de usuario y optimización de React.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# FlowUp Client - Interfaz de Usuario
 
-Currently, two official plugins are available:
+Frontend moderno construido como una SPA (Single Page Application) para garantizar una navegación fluida.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Características Técnicas
+- **Optimistic UI:** Las tareas se reflejan localmente con IDs temporales antes de la confirmación del servidor para mejorar la UX.
+- **Performance:** Uso intensivo de `useMemo` y `useCallback` para evitar re-renders costosos en listas de tareas extensas.
+- **Estilos:** Diseño responsivo y modular utilizando **Tailwind CSS**.
+- **Gestión de Estado:** Hooks nativos de React para el control del flujo de datos.
 
-## React Compiler
+## Integración con API
+El cliente se comunica con el backend mediante **Axios**. Asegúrate de que el backend esté corriendo en el puerto configurado (por defecto 3000) para evitar errores de conexión.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Scripts Disponibles
+- `npm run dev`: Inicia el servidor de desarrollo (Vite).
+- `npm run build`: Genera el bundle optimizado para producción.

@@ -1,0 +1,76 @@
+[{
+  "_id": {
+    "$oid": "69732ce411b679749d3956fc"
+  },
+  "title": "task 1",
+  "description": "task 1",
+  "user": {
+    "$oid": "6967ceec83162d371fbb4346"
+  },
+  "status": "In progress",
+  "priority": "Medium",
+  "createdAt": {
+    "$date": "2026-01-23T08:10:12.631Z"
+  },
+  "updatedAt": {
+    "$date": "2026-02-13T09:40:52.991Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69732e5311b679749d395719"
+  },
+  "title": "Task 2",
+  "description": "task 2",
+  "user": {
+    "$oid": "6967ceec83162d371fbb4346"
+  },
+  "status": "Completed",
+  "priority": "High",
+  "createdAt": {
+    "$date": "2026-01-23T08:16:19.206Z"
+  },
+  "updatedAt": {
+    "$date": "2026-02-13T09:40:36.491Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "697cea729f4ec33a52d0f16f"
+  },
+  "title": "zzz",
+  "description": "zxczxc",
+  "user": {
+    "$oid": "6967ceec83162d371fbb4346"
+  },
+  "status": "Cancelled",
+  "priority": "High",
+  "createdAt": {
+    "$date": "2026-01-30T17:29:22.609Z"
+  },
+  "updatedAt": {
+    "$date": "2026-02-13T09:36:45.833Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "698ef1a0dda1d50b8bd3ee1f"
+  },
+  "title": "asdasdas",
+  "description": "dasdasd",
+  "user": {
+    "$oid": "6967ceec83162d371fbb4346"
+  },
+  "status": "Pending",
+  "priority": "High",
+  "createdAt": {
+    "$date": "2026-02-13T09:40:48.354Z"
+  },
+  "updatedAt": {
+    "$date": "2026-02-13T09:40:48.354Z"
+  },
+  "__v": 0
+}]

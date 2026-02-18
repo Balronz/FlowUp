@@ -9,7 +9,6 @@ const taskSchema = new mongoose.Schema({
     },
     description: {
         type: String,
-        //Ommit required, default is false
         trim: true,
         maxlength: [500, 'Description must be at most 500 characters long']
     },

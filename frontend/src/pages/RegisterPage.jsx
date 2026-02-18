@@ -89,7 +89,7 @@ import { UserPlus, Mail, Lock, User, Loader2, AlertCircle } from "lucide-react";
                     <div className="bg-violet-500 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-indigo-500/10">
                         <UserPlus className="w-8 h-8 text-slate-800" />
                     </div>
-                    <h1 className="text-3xl font-black text-slate-800 tracking-tight">FlowUp</h1>
+                    <h1 className="text-3xl font-black text-slate-800 tracking-tight">Taskly</h1>
                     <p className="text-slate-500 mt-2 font-medium text-lg">Register</p>
                 </div>
 

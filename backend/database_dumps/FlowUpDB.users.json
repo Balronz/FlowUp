@@ -1,0 +1,40 @@
+[{
+  "_id": {
+    "$oid": "6967ceec83162d371fbb4346"
+  },
+  "userName": "mateo",
+  "email": "mateo@flowup.com",
+  "password": "$2b$10$Ji/0BI/Iwn.WLs.iWmsZIe9jHbxBJNhaNrNAXbbjNbpwmaUMkKPF.",
+  "role": "user",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "698ef9b9cea03e0a1706a104"
+  },
+  "userName": "test",
+  "email": "test@test.com",
+  "password": "$2b$10$QpLhBu.3q/HVwLrE0XbQJu/njERVyQDEHRCvsVip66YWXjU9C2unO",
+  "role": "user",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "698ef9ffcea03e0a1706a10e"
+  },
+  "userName": "test3",
+  "email": "test3@test.com",
+  "password": "$2b$10$QWpW2obNI1CYmJZjoNz15etF3HNgDtYlfjdCj2VhCimsDLz5iodDy",
+  "role": "user",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "698efa0ccea03e0a1706a110"
+  },
+  "userName": "prueba4",
+  "email": "prueba4@test.com",
+  "password": "$2b$10$G3enS/N63tuACj0N65J2tOoVmafdZtxTl7.Mv.NgQ7PcUWXRaGun.",
+  "role": "user",
+  "__v": 0
+}]
